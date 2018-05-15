@@ -1,0 +1,36 @@
+{
+  "name": "sec-ed-cert",
+  "version": "1.0.0",
+  "description": "Scripts for creating secp256k1 and ed25519 keys, having them sign each other, and importing them with gpg",
+  "main": "index.js",
+  "scripts": {
+    "clean": "rm -rf ./data/*",
+    "test": "react-scripts test --env=node",
+    "import": "sh import_privkeys.sh"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/eolszewski/sec-ed-cert.git"
+  },
+  "keywords": [
+    "gpg",
+    "secp256k1",
+    "ed25519",
+    "openpgp"
+  ],
+  "author": "Eric Olszewski",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/eolszewski/sec-ed-cert/issues"
+  },
+  "homepage": "https://github.com/eolszewski/sec-ed-cert#readme",
+  "dependencies": {
+    "bluebird": "^3.5.1",
+    "dotenv": "^5.0.1",
+    "fs": "0.0.1-security",
+    "openpgp": "^3.0.10"
+  },
+  "devDependencies": {
+    "react-scripts": "^1.1.1"
+  }
+}
