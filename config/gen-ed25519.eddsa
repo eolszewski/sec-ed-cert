@@ -1,0 +1,7 @@
+Key-Type: eddsa
+Key-Curve: Ed25519
+Key-Usage: sign auth
+Name-Real: Test User (ed25519)
+Name-Email: test@example.com
+Expire-Date: 1000d
+Passphrase: secret

@@ -1,0 +1,7 @@
+Key-Type: ecdsa
+Key-Curve: secp256k1
+Key-Usage: sign auth
+Name-Real: Test User (secp256k1)
+Name-Email: test@example.com
+Expire-Date: 1000d
+Passphrase: secret
