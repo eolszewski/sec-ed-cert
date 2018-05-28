@@ -51,18 +51,6 @@ describe('sec-ed-cert', () => {
     const secPrivKeyPrimaryKey = secPrivKey.primaryKey;
     const secUser = secPrivKey.users[0];
 
-    // edPrivKey trusts secPrivKey
-    let trustedSec = await secPrivKey.toPublic().signPrimaryUser([edPrivKey]);
-    expect(await trustedSec.users[0].otherCertifications[0].verify(
-      edPrivKeyPrimaryKey, { userid: secUser.userId, key: secPrivKey.toPublic().primaryKey }
-    )).toBe(true);
-
-    // secPrivKey trusts edPrivKey
-    let trustedEd = await edPrivKey.toPublic().signPrimaryUser([secPrivKey]);
-    expect(await trustedEd.users[0].otherCertifications[0].verify(
-      secPrivKeyPrimaryKey, { userid: edUser.userId, key: edPrivKey.toPublic().primaryKey }
-    )).toBe(true);
-
     // 
     // Recovery
     // 
@@ -93,44 +81,45 @@ describe('sec-ed-cert', () => {
     const secRecoveryPrivKey = openpgp.key.readArmored(
       secRecoveryKeyPair.privateKeyArmored
     ).keys[0];
+
     await secRecoveryPrivKey.decrypt(process.env.SECP256K1_USER_PASSPHRASE);
     const secRecoveryPrivKeyPrimaryKey = secRecoveryPrivKey.primaryKey;
     const secRecoveryUser = secRecoveryPrivKey.users[0];
 
-    // edRecoveryPrivKey trusts secRecoveryPrivKey
-    let trustedRecoverySec = await secRecoveryPrivKey.toPublic().signPrimaryUser([edRecoveryPrivKey]);
-    expect(await trustedRecoverySec.users[0].otherCertifications[0].verify(
-      edRecoveryPrivKeyPrimaryKey, { userid: secRecoveryUser.userId, key: secRecoveryPrivKey.toPublic().primaryKey }
-    )).toBe(true);
-
-    // secRecoveryPrivKey trusts edRecoveryPrivKey
-    let trustedRecoveryEd = await edRecoveryPrivKey.toPublic().signPrimaryUser([secRecoveryPrivKey]);
-    expect(await trustedRecoveryEd.users[0].otherCertifications[0].verify(
-      secRecoveryPrivKeyPrimaryKey, { userid: edRecoveryUser.userId, key: edRecoveryPrivKey.toPublic().primaryKey }
-    )).toBe(true);
-
-    // edRecoveryPrivKey trusts edPrivKey
-    trustedEd = await edPrivKey.toPublic().signPrimaryUser([edRecoveryPrivKey]);
-    expect(await trustedEd.users[0].otherCertifications[0].verify(
-      edRecoveryPrivKeyPrimaryKey, { userid: edUser.userId, key: edPrivKey.toPublic().primaryKey }
-    )).toBe(true);
-
-    // edPrivKey trusts edRecoveryPrivKey
-    trustedRecoveryEd = await edRecoveryPrivKey.toPublic().signPrimaryUser([edPrivKey]);
-    expect(await trustedRecoveryEd.users[0].otherCertifications[0].verify(
-      edPrivKeyPrimaryKey, { userid: edRecoveryUser.userId, key: edRecoveryPrivKey.toPublic().primaryKey }
-    )).toBe(true);
-
-    // secRecoveryPrivKey trusts secPrivKey
-    trustedSec = await secPrivKey.toPublic().signPrimaryUser([secRecoveryPrivKey]);
+    // edPrivKey, secRecoveryPrivKey trust secPrivKey
+    let trustedSec = await secPrivKey.toPublic().signPrimaryUser([edPrivKey, secRecoveryPrivKey]);
     expect(await trustedSec.users[0].otherCertifications[0].verify(
-      secRecoveryPrivKeyPrimaryKey, { userid: secUser.userId, key: secPrivKey.toPublic().primaryKey }
+      edPrivKeyPrimaryKey, { userid: secUser.userId, key: trustedSec.primaryKey }
+    )).toBe(true);
+    expect(await trustedSec.users[0].otherCertifications[1].verify(
+      secRecoveryPrivKeyPrimaryKey, { userid: secUser.userId, key: trustedSec.primaryKey }
     )).toBe(true);
 
-    // secPrivKey trusts secRecoveryPrivKey
-    trustedRecoverySec = await secRecoveryPrivKey.toPublic().signPrimaryUser([secPrivKey]);
+    // secPrivKey, edRecoveryPrivKey trust edPrivKey
+    let trustedEd = await edPrivKey.toPublic().signPrimaryUser([secPrivKey, edRecoveryPrivKey]);
+    expect(await trustedEd.users[0].otherCertifications[0].verify(
+      secPrivKeyPrimaryKey, { userid: edUser.userId, key: trustedEd.primaryKey }
+    )).toBe(true);
+    expect(await trustedEd.users[0].otherCertifications[1].verify(
+      edRecoveryPrivKeyPrimaryKey, { userid: edUser.userId, key: trustedEd.primaryKey }
+    )).toBe(true);
+
+    // edPrivKey, secRecoveryPrivKey trust edRecoveryPrivKey
+    let trustedRecoveryEd = await edRecoveryPrivKey.toPublic().signPrimaryUser([edPrivKey, secRecoveryPrivKey]);
+    expect(await trustedRecoveryEd.users[0].otherCertifications[0].verify(
+      edPrivKeyPrimaryKey, { userid: edRecoveryUser.userId, key: trustedRecoveryEd.primaryKey }
+    )).toBe(true);
+    expect(await trustedRecoveryEd.users[0].otherCertifications[1].verify(
+      secRecoveryPrivKeyPrimaryKey, { userid: edRecoveryUser.userId, key: trustedRecoveryEd.primaryKey }
+    )).toBe(true);
+
+    // secPrivKey, edRecoveryPrivKey trust secRecoveryPrivKey
+    let trustedRecoverySec = await secRecoveryPrivKey.toPublic().signPrimaryUser([secPrivKey, edRecoveryPrivKey]);
     expect(await trustedRecoverySec.users[0].otherCertifications[0].verify(
-      secPrivKeyPrimaryKey, { userid: secRecoveryUser.userId, key: secRecoveryPrivKey.toPublic().primaryKey }
+      secPrivKeyPrimaryKey, { userid: secRecoveryUser.userId, key: trustedRecoverySec.primaryKey }
+    )).toBe(true);
+    expect(await trustedRecoverySec.users[0].otherCertifications[1].verify(
+      edRecoveryPrivKeyPrimaryKey, { userid: secRecoveryUser.userId, key: trustedRecoverySec.primaryKey }
     )).toBe(true);
 
     // Exporting armored public keys
